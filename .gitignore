@@ -1,0 +1,35 @@
+# Python cache & compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# Environments and secrets
+.env
+.env.local
+venv/
+env/
+ENV/
+bin/
+include/
+lib/
+share/
+
+# Local data and output reports
+outputs/
+*.csv
+*.xlsx
+data/candidate_embeddings.npy
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# IDE and AI agent configs
+.vscode/
+.idea/
+.gemini/
+scratch/
