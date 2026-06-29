@@ -14,6 +14,20 @@ AgentHiring is a state-of-the-art **AI Recruiting Concierge Agent** and multi-st
 
 ---
 
+## 📸 Demo & Screenshots
+
+### Live AI Recruiting Chat Interface
+Here is the interactive recruiting agent answering queries inside the Streamlit dashboard:
+
+![AgentHiring Chat Console](assets/agent_response.png)
+
+### Sourcing & Interactive Playback
+Here is a demonstration of the agent dynamically executing local MCP auditing and parsing tools:
+
+![AgentHiring Interactive Demo](assets/recruiting_agent_chat.webp)
+
+---
+
 ## ⚙️ System Architecture
 
 AgentHiring moves beyond static applicants tracking systems (ATS) by placing an intelligent reasoning loop on top of a highly optimized offline search engine:
@@ -45,7 +59,7 @@ Recruiter / Client
 ### Steps
 1.  **Clone & Install Dependencies:**
     ```bash
-    git clone https://github.com/yourusername/AgentHiring.git
+    git clone https://github.com/mohd-ibadullah/AgentHiring.git
     cd AgentHiring
     pip install -r requirements.txt
     ```
@@ -89,13 +103,16 @@ python src/mcp_server.py
 
 ---
 
-## 📊 Core Performance & Evaluation
+## 📊 Evaluation & Verification
 
-*   **Scanning Speed:** Streams and parses 100,000 JSON lines in a single pass in **~10 seconds**.
-*   **Total Runtime:** Ranks and reranks candidate profiles on CPU in **~25–35 seconds**.
-*   **Adversarial Defense:** Successfully identifies and filters out **301 decoy/honeypot profiles** from candidate lists (e.g. `CAND_0000002`).
+To validate the ranking quality of AgentHiring, we include an automated evaluation module that compares our multi-stage pipeline against a standard **BM25 Lexical Baseline**.
 
-### System Evaluation Metrics (vs. BM25 Baseline)
+You can run this evaluation script locally to verify the performance numbers:
+```bash
+python src/evaluate.py
+```
+
+### Evaluation Metrics Summary (vs. BM25 Baseline)
 The multi-stage pipeline yields substantial improvements over standard keyword-matching ATS:
 
 | Metric | Relative Lift (AgentHiring vs BM25 Baseline) | Rationale |
