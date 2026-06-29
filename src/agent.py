@@ -132,20 +132,38 @@ class MockAgent:
     def run(self, prompt, **kwargs):
         prompt_lower = prompt.lower()
         if "rank" in prompt_lower or "find" in prompt_lower:
-            return "Here is the candidate ranking results:\n" + rank_candidates_tool("AI Engineer", run_full_dataset=False, top_n=3)
+            raw_res = rank_candidates_tool("AI Engineer", run_full_dataset=False, top_n=3)
+            try:
+                parsed = json.loads(raw_res)
+                formatted = json.dumps(parsed, indent=2)
+                return f"Here is the candidate ranking results:\n```json\n{formatted}\n```"
+            except Exception:
+                return f"Here is the candidate ranking results:\n```json\n{raw_res}\n```"
         elif "profile" in prompt_lower or "details" in prompt_lower:
             import re
             match = re.search(r'cand_\d+', prompt_lower)
             if match:
                 cid = match.group(0).upper()
-                return get_candidate_profile_tool(cid)
+                raw_res = get_candidate_profile_tool(cid)
+                try:
+                    parsed = json.loads(raw_res)
+                    formatted = json.dumps(parsed, indent=2)
+                    return f"Candidate Profile Details ({cid}):\n```json\n{formatted}\n```"
+                except Exception:
+                    return f"Candidate Profile Details ({cid}):\n```json\n{raw_res}\n```"
             return "Please specify a candidate ID (e.g., CAND_0000010) to inspect."
         elif "honeypot" in prompt_lower or "trap" in prompt_lower:
             import re
             match = re.search(r'cand_\d+', prompt_lower)
             if match:
                 cid = match.group(0).upper()
-                return detect_honeypot_trap_tool(cid)
+                raw_res = detect_honeypot_trap_tool(cid)
+                try:
+                    parsed = json.loads(raw_res)
+                    formatted = json.dumps(parsed, indent=2)
+                    return f"Honeypot Trap Analysis ({cid}):\n```json\n{formatted}\n```"
+                except Exception:
+                    return f"Honeypot Trap Analysis ({cid}):\n```json\n{raw_res}\n```"
             return "Please specify a candidate ID (e.g., CAND_0000002) to audit."
         return f"[Concierge Mock Agent] I parsed your query: '{prompt}'. (To use live LLM reasoning, please configure GEMINI_API_KEY in your .env file)."
 
