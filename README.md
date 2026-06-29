@@ -2,6 +2,8 @@
 
 AgentHiring is a state-of-the-art **AI Recruiting Concierge Agent** and multi-stage candidate discovery engine designed to streamline talent sourcing. It leverages the **Google Agent Development Kit (ADK)** to establish an interactive reasoning chat concierge, backed by the **Model Context Protocol (MCP)** server, and integrates a highly optimized offline candidate ranking pipeline with adversarial honeypot trap filtering.
 
+Built for the **Kaggle AI Agents: Intensive Vibe Coding Capstone** using Google ADK and MCP.
+
 ---
 
 ## 🌟 Key Features
