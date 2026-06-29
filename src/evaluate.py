@@ -85,28 +85,38 @@ def main():
 
     parsed_jd = parse_job_description(jd_input)
 
-    # Load Submission CSV
+    # Load Submission CSV or run pipeline dynamically
     sub_path = Path(args.submission)
-    if not sub_path.exists():
-        print(f"Error: Submission CSV not found at {sub_path}")
-        sys.exit(1)
-
-    df_sub = pd.read_csv(sub_path)
-    # Sort by rank ascending
-    df_sub = df_sub.sort_values("rank")
-    our_top_100 = df_sub["candidate_id"].tolist()
+    if sub_path.exists():
+        df_sub = pd.read_csv(sub_path)
+        df_sub = df_sub.sort_values("rank")
+        our_top_100 = df_sub["candidate_id"].tolist()
+        print(f"Loaded {len(our_top_100)} candidates from submission CSV.")
+    else:
+        from src.pipeline import run_ranking_pipeline
+        temp_csv = str(project_root / "outputs" / "evaluation_temp_submission.csv")
+        results = run_ranking_pipeline(
+            candidates_path=str(candidates_path),
+            jd_input=jd_input,
+            out_csv_path=temp_csv,
+            top_n=100
+        )
+        our_top_100 = [cand["candidate_id"] for cand in results]
+        print(f"Pipeline completed dynamically. Evaluated {len(our_top_100)} candidates.")
 
     # Define pseudo-relevance labels: top 20 of our full system = relevant
     relevant_set = set(our_top_100[:20])
-
-    print(f"Loaded {len(our_top_100)} candidates from {sub_path.name}.")
     print(f"Pseudo-relevance set contains {len(relevant_set)} candidate IDs (top 20 of full system).")
 
     # Stream and load all candidates for BM25 indexing
-    print("Streaming all candidates to build BM25 baseline index...")
+    print("Loading all candidates for BM25 indexing...")
     all_candidates = []
-    for cand in stream_candidates(str(candidates_path)):
-        all_candidates.append(cand)
+    if str(candidates_path).endswith(".jsonl"):
+        for cand in stream_candidates(str(candidates_path)):
+            all_candidates.append(cand)
+    else:
+        from src.data_loader import load_sample_candidates
+        all_candidates = load_sample_candidates(str(candidates_path))
     print(f"Loaded {len(all_candidates)} candidates.")
 
     # Run BM25 baseline ranking (no embeddings, no honeypots, no signals)
@@ -146,9 +156,9 @@ def main():
     bm25_hp_rate = (bm25_honeypots / len(bm25_top_100)) * 100.0
 
     print("\n" + "=" * 60)
-    print("EVALUATION RESULTS: TalentLens AI vs BM25 Baseline")
+    print("EVALUATION RESULTS: AgentHiring vs BM25 Baseline")
     print("=" * 60)
-    print(f"{'Metric':<25} | {'BM25 Baseline':<15} | {'TalentLens AI':<15}")
+    print(f"{'Metric':<25} | {'BM25 Baseline':<15} | {'AgentHiring':<15}")
     print("-" * 60)
     print(f"{'Precision@10':<25} | {p_10_bm25:<15.4f} | {p_10_our:<15.4f}")
     print(f"{'Recall@20':<25} | {r_20_bm25:<15.4f} | {r_20_our:<15.4f}")
@@ -164,7 +174,7 @@ def main():
             "ndcg_10": ndcg_10_bm25,
             "honeypot_rate": bm25_hp_rate
         },
-        "talent_lens_ai": {
+        "agent_hiring": {
             "p_10": p_10_our,
             "r_20": r_20_our,
             "ndcg_10": ndcg_10_our,
@@ -173,6 +183,7 @@ def main():
     }
     
     out_json = project_root / "outputs" / "evaluation_results.json"
+    out_json.parent.mkdir(parents=True, exist_ok=True)
     with open(out_json, "w") as f:
         json.dump(results, f, indent=2)
     print(f"Results saved to {out_json}")
